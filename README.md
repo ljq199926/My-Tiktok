@@ -19,7 +19,7 @@ Services：存放各个微服务，后期可拆分优化
   - handler：服务的具体逻辑
   - proto：和网关存放的一致
   - subscriber：暂且未使用到
-  - dockerfile
+  - dockerfile：将微服务打包成镜像
   - makefile：需要安装MinGW才能使用make命令
   - main.go：微服务入口函数
 
