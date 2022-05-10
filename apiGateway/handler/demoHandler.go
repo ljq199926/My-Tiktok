@@ -5,13 +5,18 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	client "github.com/micro/go-micro/v2/client/grpc"
+	"github.com/micro/go-micro/v2"
+	"github.com/micro/go-plugins/registry/consul/v2"
 )
 
 func Hello(ctx *gin.Context) {
 	name := ctx.Param("name")
 	fmt.Println(name)
-	demoService := pb.NewDemoService("go.micro.service.demoService", client.NewClient())
+	reg := consul.NewRegistry()
+	microService := micro.NewService(
+		micro.Registry(reg),
+	)
+	demoService := pb.NewDemoService("go.micro.service.demoService", microService.Client())
 	resp, err := demoService.Call(context.Background(), &pb.Request{
 		Name: name,
 	})
