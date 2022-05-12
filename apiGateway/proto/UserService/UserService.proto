@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package go.micro.service.UserService;
+option go_package = "proto/UserService";
+service UserService {
+	rpc Login(douyin_user_login_request)returns(douyin_user_login_response);
+	rpc Register(douyin_user_register_request)returns(douyin_user_register_response);
+	rpc Info(douyin_user_request)returns(douyin_user_response);
+}
+message douyin_user_register_request {
+	string username = 1;
+	string password = 2;
+}
+
+message douyin_user_register_response {
+	int32 status_code = 1;
+	string status_msg = 2;
+	int64 user_id = 3;
+	string token = 4;
+}
+message douyin_user_login_request {
+	string username = 1;
+	string password = 2;
+}
+
+message douyin_user_login_response {
+	int32 status_code = 1;
+	string status_msg = 2;
+	int64 user_id = 3;
+	string token = 4;
+}
+message douyin_user_request {
+	int64 user_id = 1;
+	string token = 2;
+}
+
+message douyin_user_response {
+	int32 status_code = 1;
+	string status_msg = 2;
+	User user = 3;
+}
+message User{
+  int64 id = 1; // 用户id
+  string name = 2; // 用户名称
+  int64 follow_count = 3; // 关注总数
+  int64 follower_count = 4; // 粉丝总数
+  bool is_follow = 5; // true-已关注，false-未关注
+}

@@ -1,0 +1,10 @@
+mysql:
+  user : root
+  password : admin
+  host : 114.132.251.201
+  port : 3306
+  name : mytiktok
+
+redis:
+  host : 127.0.0.1
+  port : 6379
