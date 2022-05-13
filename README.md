@@ -38,3 +38,51 @@ go get -v ./...
 浏览器键入localhost:8080/demo/张三
 
 网页上出现{"msg":"Hello 张三"}说明成功进行了http网关访问及网关与微服务的rpc调用
+
+# 开发说明
+
+首先cd到项目下边的Services，然后命令
+
+```
+micro new --gopath=false demoService(这个为微服务的名称)
+```
+
+然后micro工具集会自动生成这个微服务的基本框架，接着对demoService/proto/demoService下的proto文件进行修改，改为飞书文档里边的protobuf的数据传递格式，同时添加rpc方法，并加上一句option go_package = “proto/(demoService)”;
+
+在有安装MinGW的情况下，直接执行
+
+```
+make proto
+```
+
+没有的情况下，打开Makefile文件，复制命令执行
+
+```
+protoc --proto_path=. --micro_out=${MODIFY}:. --go_out=${MODIFY}:. proto/demoService/demoService.proto
+```
+
+#### 版本问题修改
+
+打开生成的xxx.pb.micro.go文件，把import里面的包版本进行手动修改解决报错，加上v2
+
+```go
+client "github.com/micro/go-micro/v2/client"
+server "github.com/micro/go-micro/v2/server"
+```
+
+
+
+接着修改handler文件下的demoService.go 文件，写微服务的具体逻辑实现
+
+微服务端写完，把proto下的文件夹拷贝到网关的proto里面
+
+然后在网关的router.go加入对应的路由，如注册的网关
+
+```
+route.GET("/douyin/user/register/",handler.Register)
+```
+
+然后去网关的handler里边添加对应的handler方法，比如上边的Register，写到userHandler.go里
+
+后面路由多了就可以用路由组进行管理，然后在网关这边进行鉴权的操作
+
