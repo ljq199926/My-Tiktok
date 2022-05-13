@@ -2,11 +2,13 @@ package router
 
 import (
 	"apiGateway/handler"
+	"apiGateway/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func NewRouter() *gin.Engine {
 	route := gin.Default()
+	route.Use(middleware.Cors())
 	route.GET("/demo/:name", handler.Hello)
 
 	userRouter := route.Group("/douyin")
