@@ -36,3 +36,13 @@ func LoginCheck(data *User, username string) int {
 	}
 	return 0
 }
+func SelecUser(username string) int64 {
+	var user User
+	db.Where("username = ?", username).First(&user)
+	return user.UserId
+}
+func GetUserById(userid int64) User {
+	var user User
+	db.Where("user_id = ?", userid).First(&user)
+	return user
+}

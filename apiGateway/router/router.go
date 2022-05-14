@@ -15,7 +15,13 @@ func NewRouter() *gin.Engine {
 	//这里使用中间件
 	userRouter.POST("/user/register/", handler.Register)
 	userRouter.POST("/user/login/", handler.Login)
-	userRouter.GET("/user/", handler.Info)
+
+	authRouter := route.Group("/douyin/")
+
+	authRouter.Use(middleware.JwtMiddleware())
+	{
+		authRouter.GET("user/", handler.Info)
+	}
 
 	return route
 }

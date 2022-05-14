@@ -3,6 +3,7 @@ package handler
 import (
 	"UserService/model"
 	userService "UserService/proto/UserService"
+	"UserService/utils"
 	"context"
 	"fmt"
 	"github.com/gomodule/redigo/redis"
@@ -30,7 +31,13 @@ func (e *UserService) Login(ctx context.Context, req *userService.DouyinUserLogi
 		return nil
 	}
 	//生成token
-	token := username + password
+	fmt.Println(user.UserId)
+	token, err := utils.CreateToken(user.UserId)
+	if err != nil {
+		rsp.StatusCode = 1
+		rsp.StatusMsg = "Token Create failed"
+		return nil
+	}
 	//token存redis token为key，用户信息为value
 	c := model.InitRedis()
 	if c != nil {
@@ -75,25 +82,46 @@ func (e *UserService) Register(ctx context.Context, req *userService.DouyinUserR
 		rsp.StatusMsg = "User create failed"
 		return nil
 	}
+	id := model.SelecUser(username)
+	fmt.Println(id)
 	//生成token
-	token := username + password
+	token, err := utils.CreateToken(id)
+	if err != nil {
+		rsp.StatusCode = 1
+		rsp.StatusMsg = "Token Create failed"
+		return nil
+	}
 	//token存redis token为key，用户信息为value
 	c := model.InitRedis()
+	defer c.Close()
 	if c != nil {
 		_, err := c.Do("HMSET", redis.Args{}.Add(token).AddFlat(&user)...)
 		if err != nil {
 			fmt.Println("struct err: ", err)
 			rsp.StatusCode = 1
-			rsp.StatusMsg = "token save failed"
+			rsp.StatusMsg = "Token save failed"
 			return nil
 		}
 	}
 	rsp.StatusCode = 0 //0代表成功其他代表失败
 	rsp.StatusMsg = "注册成功！"
-	rsp.UserId = user.UserId
+	rsp.UserId = id
 	rsp.Token = token
 	return nil
 }
 func (e *UserService) Info(ctx context.Context, req *userService.DouyinUserRequest, rsp *userService.DouyinUserResponse) error {
+	id := req.UserId
+	user := model.GetUserById(id)
+	rsp_user := &userService.User{
+		Name:          user.Username,
+		Id:            user.UserId,
+		FollowCount:   user.FollowCount,
+		FollowerCount: user.FollowerCount,
+		IsFollow:      true,
+	}
+	rsp.User = rsp_user
+	rsp.StatusCode = 0
+	rsp.StatusMsg = "Get user's information successfully"
+
 	return nil
 }
