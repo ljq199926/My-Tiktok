@@ -12,6 +12,7 @@ import (
 func main() {
 	//初始化db
 	model.InitDB()
+	model.InitRedis()
 	// New Service
 	reg := consul.NewRegistry()
 	// New Service

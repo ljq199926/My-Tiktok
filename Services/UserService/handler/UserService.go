@@ -6,7 +6,6 @@ import (
 	"UserService/utils"
 	"context"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -31,7 +30,6 @@ func (e *UserService) Login(ctx context.Context, req *userService.DouyinUserLogi
 		return nil
 	}
 	//生成token
-	fmt.Println(user.UserId)
 	token, err := utils.CreateToken(user.UserId)
 	if err != nil {
 		rsp.StatusCode = 1
@@ -39,16 +37,25 @@ func (e *UserService) Login(ctx context.Context, req *userService.DouyinUserLogi
 		return nil
 	}
 	//token存redis token为key，用户信息为value
-	c := model.InitRedis()
-	if c != nil {
-		_, err := c.Do("HMSET", redis.Args{}.Add(token).AddFlat(&user)...)
-		if err != nil {
-			fmt.Println("struct err: ", err)
-			rsp.StatusCode = 1
-			rsp.StatusMsg = "token save failed"
-			return nil
-		}
+	//c := model.InitRedis()
+	//if c != nil {
+	//	_, err := c.Do("HMSET", redis.Args{}.Add(token).AddFlat(&user)...)
+	//	if err != nil {
+	//		fmt.Println("struct err: ", err)
+	//		rsp.StatusCode = 1
+	//		rsp.StatusMsg = "token save failed"
+	//		return nil
+	//	}
+	//}
+
+	err = model.AddToken(token, &user)
+	if err != nil {
+		fmt.Println("struct err: ", err)
+		rsp.StatusCode = 1
+		rsp.StatusMsg = "token save failed"
+		return nil
 	}
+
 	rsp.StatusCode = 0 //0代表成功其他代表失败
 	rsp.StatusMsg = "登录成功！"
 	rsp.UserId = user.UserId
@@ -92,16 +99,23 @@ func (e *UserService) Register(ctx context.Context, req *userService.DouyinUserR
 		return nil
 	}
 	//token存redis token为key，用户信息为value
-	c := model.InitRedis()
-	defer c.Close()
-	if c != nil {
-		_, err := c.Do("HMSET", redis.Args{}.Add(token).AddFlat(&user)...)
-		if err != nil {
-			fmt.Println("struct err: ", err)
-			rsp.StatusCode = 1
-			rsp.StatusMsg = "Token save failed"
-			return nil
-		}
+	//c := model.InitRedis()
+	//defer c.Close()
+	//if c != nil {
+	//	_, err := c.Do("HMSET", redis.Args{}.Add(token).AddFlat(&user)...)
+	//	if err != nil {
+	//		fmt.Println("struct err: ", err)
+	//		rsp.StatusCode = 1
+	//		rsp.StatusMsg = "Token save failed"
+	//		return nil
+	//	}
+	//}
+	err = model.AddToken(token, &user)
+	if err != nil {
+		fmt.Println("struct err: ", err)
+		rsp.StatusCode = 1
+		rsp.StatusMsg = "token save failed"
+		return nil
 	}
 	rsp.StatusCode = 0 //0代表成功其他代表失败
 	rsp.StatusMsg = "注册成功！"

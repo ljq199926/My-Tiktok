@@ -3,7 +3,7 @@ package model
 import (
 	"VideoService/utils"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -13,6 +13,7 @@ import (
 )
 
 var db *gorm.DB
+var redisDB *redis.ClusterClient
 var err error
 
 func InitDB() {
@@ -51,11 +52,21 @@ func InitDB() {
 	sqlDB.SetConnMaxLifetime(10 * time.Second)
 }
 
-func InitRedis() redis.Conn {
-	c, err := redis.Dial("tcp", fmt.Sprintf("%s:%s", utils.RedisHost, utils.RedisPort))
-	if err != nil {
-		fmt.Printf("redis.Dial() error:%v", err)
-		return nil
-	}
-	return c
+//func InitRedis() redis.Conn {
+//	c, err := redis.Dial("tcp", fmt.Sprintf("%s:%s", utils.RedisHost, utils.RedisPort))
+//	if err != nil {
+//		fmt.Printf("redis.Dial() error:%v", err)
+//		return nil
+//	}
+//	return c
+//}
+
+func InitRedis() {
+	redisDB = redis.NewClusterClient(&redis.ClusterOptions{
+		Addrs: utils.RedisAddr,
+
+		// To route commands by latency or randomly, enable one of the following.
+		//RouteByLatency: true,
+		//RouteRandomly: true,
+	})
 }

@@ -3,7 +3,8 @@ package model
 import (
 	"UserService/utils"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis/v8"
+	log "github.com/micro/go-micro/v2/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -13,6 +14,7 @@ import (
 )
 
 var db *gorm.DB
+var redisDb *redis.ClusterClient
 var err error
 
 func InitDB() {
@@ -30,6 +32,7 @@ func InitDB() {
 		DisableForeignKeyConstraintWhenMigrating: true,
 		// 禁用默认事务（提高运行速度）
 		SkipDefaultTransaction: true,
+		PrepareStmt:            true,
 		NamingStrategy: schema.NamingStrategy{
 			// 使用单数表名，启用该选项，此时，`User` 的表名应该是 `user`
 			SingularTable: true,
@@ -50,11 +53,22 @@ func InitDB() {
 	sqlDB.SetConnMaxLifetime(10 * time.Second)
 }
 
-func InitRedis() redis.Conn {
-	c, err := redis.Dial("tcp", fmt.Sprintf("%s:%s", utils.RedisHost, utils.RedisPort))
-	if err != nil {
-		fmt.Printf("redis.Dial() error:%v", err)
-		return nil
-	}
-	return c
+//func InitRedis() redis.Conn {
+//	c, err := redis.Dial("tcp", fmt.Sprintf("%s:%s", utils.RedisHost, utils.RedisPort))
+//	if err != nil {
+//		fmt.Printf("redis.Dial() error:%v", err)
+//		return nil
+//	}
+//	return c
+//}
+
+func InitRedis() {
+	log.Info("init redis: ", utils.RedisAddr)
+	redisDb = redis.NewClusterClient(&redis.ClusterOptions{
+		Addrs: utils.RedisAddr,
+
+		// To route commands by latency or randomly, enable one of the following.
+		//RouteByLatency: true,
+		//RouteRandomly: true,
+	})
 }

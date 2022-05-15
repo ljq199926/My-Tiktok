@@ -12,7 +12,7 @@ import (
 
 func main() {
 	model.InitDB()
-
+	model.InitRedis()
 	// New Service
 	reg := consul.NewRegistry()
 

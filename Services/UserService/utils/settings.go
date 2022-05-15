@@ -15,8 +15,7 @@ type Yaml struct {
 		Name     string `yaml:"name"`
 	}
 	Redis struct {
-		Host string `yaml:"host"`
-		Port string `yaml:"port"`
+		Addr []string `yaml:"addr"`
 	}
 	JwtKey string
 }
@@ -28,8 +27,7 @@ var (
 	DbPort     string
 	DbName     string
 
-	RedisHost string
-	RedisPort string
+	RedisAddr []string
 
 	JwtKey string
 )
@@ -57,8 +55,7 @@ func LoadDB(conf *Yaml) {
 	DbName = conf.MySQL.Name
 }
 func LoadRedis(conf *Yaml) {
-	RedisHost = conf.Redis.Host
-	RedisPort = conf.Redis.Port
+	RedisAddr = conf.Redis.Addr
 }
 func LoadJwt(conf *Yaml) {
 	JwtKey = conf.JwtKey

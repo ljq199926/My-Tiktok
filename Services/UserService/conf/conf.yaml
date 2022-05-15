@@ -6,7 +6,9 @@ mysql:
   name : mytiktok
 
 redis:
-  host : 114.132.251.201
-  port : 7000
+  addr:
+    - 114.132.251.201:7000
+    - 114.132.251.201:7001
+    - 114.132.251.201:7002
 
 jwtkey : verysecrt
