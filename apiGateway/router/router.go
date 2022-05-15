@@ -25,6 +25,7 @@ func NewRouter() *gin.Engine {
 	}
 
 	userRouter.GET("/feed/", handler.Feed)
+	userRouter.GET("/publish/list/", handler.PublishList)
 
 	return route
 }

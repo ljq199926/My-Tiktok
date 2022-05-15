@@ -67,6 +67,12 @@ func QueryVideo(date *string, limit *int) []*Video {
 	return VideoList
 }
 
+func QueryVideoByUserId(userId int64) []*Video {
+	var VideoList []*Video
+	db.Where("author_id =  ?", userId).Find(&VideoList)
+	return VideoList
+}
+
 func QueryUserById(Id int64) User {
 	var user User
 	db.Find(&user, Id)

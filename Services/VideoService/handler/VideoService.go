@@ -17,12 +17,13 @@ func (video *VideoService) PublishAction(c context.Context, req *videoService.Do
 	log.Info("PublishAction called")
 	var v model.Video
 	model.InitVideo(&v)
-	//Todo获取id
-	r := model.InitRedis()
+
 	var data []byte
 	log.Infof("stream_size：%d", len(req.Data))
 	token = req.Token
 	data = req.Data
+
+	r := model.InitRedis()
 	if r != nil {
 		userId, err := redis.Int64(r.Do("HGET", token, "UserId"))
 		if err != nil {
@@ -57,8 +58,13 @@ func (video *VideoService) PublishAction(c context.Context, req *videoService.Do
 	return nil
 }
 
-func PaserModel(date string) (int64, []*videoService.Video) {
-	VideoList := model.QueryVideo(&date, &utils.VideoNumLimit)
+func PaserModel(date string, video []*model.Video) (int64, []*videoService.Video) {
+	var VideoList []*model.Video
+	if date == "" && video != nil {
+		VideoList = video
+	} else if date != "" && video == nil {
+		VideoList = model.QueryVideo(&date, &utils.VideoNumLimit)
+	}
 	var LatestTime = time.Now().Unix()
 	var Videos []*videoService.Video
 	for _, v := range VideoList {
@@ -100,6 +106,41 @@ func (video *VideoService) Feed(c context.Context, req *videoService.DouyinFeedR
 
 	rep.StatusCode = 0
 	rep.StatusMsg = "success"
-	rep.NextTime, rep.VideoList = PaserModel(date)
+	rep.NextTime, rep.VideoList = PaserModel(date, nil)
+	return nil
+}
+
+func (video *VideoService) PublishList(c context.Context, req *videoService.DouyinPublishListRequest, rep *videoService.DouyinPublishListResponse) error {
+	token := req.Token
+	if token == "" {
+		log.Error("token is empty")
+		rep.StatusCode = 1
+		rep.StatusMsg = "token error"
+		rep.VideoList = nil
+		return nil
+	}
+
+	r := model.InitRedis()
+	var userId int64
+	if r != nil {
+		uId, err := redis.Int64(r.Do("HGET", token, "UserId"))
+		if err != nil {
+			log.Errorf("redis query error:%s, %d", err.Error(), token)
+			rep.StatusCode = 1
+			rep.StatusMsg = "token query failed"
+			return nil
+		}
+		userId = uId
+	} else {
+		log.Error("init redis error")
+		rep.StatusCode = 1
+		rep.StatusMsg = "init redis error"
+		return nil
+	}
+
+	videoList := model.QueryVideoByUserId(userId)
+	_, rep.VideoList = PaserModel("", videoList)
+	rep.StatusCode = 0
+	rep.StatusMsg = "success"
 	return nil
 }

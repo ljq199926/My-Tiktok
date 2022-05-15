@@ -84,3 +84,18 @@ func Feed(c *gin.Context) {
 	}
 	c.JSON(200, &rsp)
 }
+
+func PublishList(c *gin.Context) {
+	token := c.Query("token")
+	microService := utils.InitService()
+	//microService.Client().Init(grpc.MaxSendMsgSize(1024 * 1024 * 1024))
+	videoService := pb.NewVideoService("go.micro.service.VideoService", microService.Client())
+	rsp, err := videoService.PublishList(context.Background(), &pb.DouyinPublishListRequest{
+		Token: token,
+	})
+
+	if err != nil {
+		log.Error(err)
+	}
+	c.JSON(200, &rsp)
+}
