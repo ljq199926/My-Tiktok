@@ -1,0 +1,18 @@
+mysql:
+  user: root
+  password: admin
+  host: 114.132.251.201
+  port: 3306
+  name: mytiktok
+
+redis:
+  host: 114.132.251.201
+  port: 7000
+
+oss:
+  ak: AVfymoHxgIsrJSud9MO89K0t1EBFved1IeyLbT4h
+  sk: 7PTj9_nGWcNjHjKHL18lGoOCvjE4RjajttKOL3vz
+  bucket: tiktok2
+
+video:
+  NumLimit: 30

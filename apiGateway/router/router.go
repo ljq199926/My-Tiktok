@@ -21,7 +21,10 @@ func NewRouter() *gin.Engine {
 	authRouter.Use(middleware.JwtMiddleware())
 	{
 		authRouter.GET("user/", handler.Info)
+		authRouter.POST("/publish/action/", handler.UploadVideo)
 	}
+
+	userRouter.GET("/feed/", handler.Feed)
 
 	return route
 }
