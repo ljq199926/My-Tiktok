@@ -23,6 +23,7 @@ import (
 */
 
 func UploadVideo(c *gin.Context) {
+	log.Info("UploadVideo method")
 	token := c.PostForm("token")
 	data, errr := c.FormFile("data")
 	log.Infof("data_size：%d", data.Size)
@@ -97,5 +98,19 @@ func PublishList(c *gin.Context) {
 	if err != nil {
 		log.Error(err)
 	}
-	c.JSON(200, &rsp)
+	//err = c.ShouldBindJSON(rsp)
+	//if err != nil {
+	//	log.Error(err)
+	//}
+	//c.JSON(200, &rsp)
+
+	if (*rsp).VideoList == nil {
+		c.JSON(200, gin.H{
+			"status_code": (*rsp).StatusCode,
+			"status_msg":  (*rsp).StatusMsg,
+			"video_list":  []*pb.Video{},
+		})
+	} else {
+		c.JSON(200, &rsp)
+	}
 }

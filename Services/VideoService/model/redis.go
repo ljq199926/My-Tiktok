@@ -23,5 +23,10 @@ func QueryUserIdByToken(c context.Context, token string) (int64, error) {
 	if len(tokens) == 0 {
 		return -1, errors.New("query redis failed")
 	}
-	return strconv.ParseInt(tokens[0].(string), 10, 64)
+	parseInt, err := strconv.ParseInt(tokens[0].(string), 10, 64)
+	if err != nil {
+		return -1, err
+	}
+	log.Info("QueryUserIdByToken-END: ", parseInt)
+	return parseInt, nil
 }

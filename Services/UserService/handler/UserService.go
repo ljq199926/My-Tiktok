@@ -90,6 +90,7 @@ func (e *UserService) Register(ctx context.Context, req *userService.DouyinUserR
 		return nil
 	}
 	id := model.SelecUser(username)
+	user.UserId = id
 	fmt.Println(id)
 	//生成token
 	token, err := utils.CreateToken(id)

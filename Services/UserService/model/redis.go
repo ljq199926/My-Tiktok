@@ -24,6 +24,8 @@ func AddToken(token string, user *User) error {
 		"FollowerCount": user.FollowerCount,
 		"CreateDate":    user.CreateDate,
 	}
-	log.Info("AddToken: ", redisDb, token, user)
-	return redisDb.HMSet(context.Background(), token, data).Err()
+	log.Info("AddToken: ", redisDb, token, user, data)
+	err := redisDb.HMSet(context.Background(), token, data).Err()
+	log.Info(err)
+	return err
 }

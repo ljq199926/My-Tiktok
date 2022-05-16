@@ -7,8 +7,6 @@ import (
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
-	"math/rand"
-	"time"
 )
 
 /*
@@ -23,7 +21,9 @@ import (
 
 func UploadQiniu(data []byte) string {
 	putPolicy := storage.PutPolicy{
-		Scope: Bucket,
+		Scope:               Bucket,
+		PersistentOps:       "vframe/jpg/offset/1/w/1080/h/1920",
+		PersistentNotifyURL: "http://fake.com/qiniu/notify",
 	}
 	mac := qbox.NewMac(AK, SK)
 	upToken := putPolicy.UploadToken(mac)
@@ -42,10 +42,10 @@ func UploadQiniu(data []byte) string {
 
 	//data := []byte("hello, this is qiniu cloud")
 	dataLen := int64(len(data))
-	rand.Seed(time.Now().UnixNano())
-	path := "%d%05d"
-	path = fmt.Sprintf(path, time.Now().UnixNano(), rand.Intn(100000))
+	path := "%d"
+	path = fmt.Sprintf(path, snowFlake.GetId())
 	log.Infof("start upload：%s", path)
 	go formUploader.Put(context.Background(), &ret, upToken, path, bytes.NewReader(data), dataLen, nil)
+	log.Info("ret", ret)
 	return path
 }

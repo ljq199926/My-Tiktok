@@ -102,16 +102,16 @@ func (video *VideoService) PublishList(c context.Context, req *videoService.Douy
 		rep.VideoList = nil
 		return nil
 	}
-
 	userId, err := model.QueryUserIdByToken(c, token)
 	if err != nil {
-		log.Errorf("redis query error:%s, %d", err.Error(), token)
+		log.Errorf("redis query error:%s, %s", err.Error(), token)
 		rep.StatusCode = 1
 		rep.StatusMsg = err.Error()
 		return nil
 	}
 	videoList := model.QueryVideoByUserId(userId)
 	_, rep.VideoList = PaserModel("", videoList)
+	log.Info("rep.VideoList:", rep.VideoList)
 	rep.StatusCode = 0
 	rep.StatusMsg = "success"
 	return nil
