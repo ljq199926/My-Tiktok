@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	log "github.com/micro/go-micro/v2/logger"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
@@ -20,9 +21,12 @@ import (
 */
 
 func UploadQiniu(data []byte) string {
+	path := "%d"
+	path = fmt.Sprintf(path, snowFlake.GetId())
+	encodedEntryURI := base64.URLEncoding.EncodeToString([]byte(Bucket + ":cover/" + path))
 	putPolicy := storage.PutPolicy{
 		Scope:               Bucket,
-		PersistentOps:       "vframe/jpg/offset/1/w/1080/h/1920",
+		PersistentOps:       "vframe/jpg/offset/1|saveas/" + encodedEntryURI,
 		PersistentNotifyURL: "http://fake.com/qiniu/notify",
 	}
 	mac := qbox.NewMac(AK, SK)
@@ -42,8 +46,7 @@ func UploadQiniu(data []byte) string {
 
 	//data := []byte("hello, this is qiniu cloud")
 	dataLen := int64(len(data))
-	path := "%d"
-	path = fmt.Sprintf(path, snowFlake.GetId())
+
 	log.Infof("start upload：%s", path)
 	go formUploader.Put(context.Background(), &ret, upToken, path, bytes.NewReader(data), dataLen, nil)
 	log.Info("ret", ret)

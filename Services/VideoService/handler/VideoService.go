@@ -34,6 +34,7 @@ func (video *VideoService) PublishAction(c context.Context, req *videoService.Do
 	//go utils.UploadQiniu(data)
 	res := utils.UploadQiniu(data)
 	v.PlayUrl = "http://rbtdate4z.hn-bkt.clouddn.com/" + res
+	v.CoverUrl = "http://rbtdate4z.hn-bkt.clouddn.com/cover/" + res
 	model.InsertVideo(&v)
 
 	rsp.StatusCode = 0
