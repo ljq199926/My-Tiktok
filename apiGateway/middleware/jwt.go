@@ -32,12 +32,15 @@ func CheckToken(token string) (*MyClaims, bool) {
 func JwtMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//从请求头中获取token
-		tokenStr := c.Query("token")
+		tokenStr := c.Query("token") //从url参数获取
 		//用户不存在
 		if tokenStr == "" {
-			c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "用户不存在"})
-			c.Abort() //阻止执行
-			return
+			tokenStr = c.PostForm("token") //body获取
+			if tokenStr == "" {
+				c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "用户不存在"})
+				c.Abort() //阻止执行
+				return
+			}
 		}
 		//token格式错误
 		//tokenSlice := strings.SplitN(tokenStr, " ", 2)
