@@ -66,9 +66,12 @@ func InitRedis() {
 	log.Info("init redis: ", utils.RedisAddr)
 	redisDb = redis.NewClusterClient(&redis.ClusterOptions{
 		Addrs: utils.RedisAddr,
+		//MinIdleConns: 10,
+		ReadTimeout:  time.Minute,
+		WriteTimeout: time.Minute,
 
 		// To route commands by latency or randomly, enable one of the following.
 		//RouteByLatency: true,
-		//RouteRandomly: true,
+		RouteRandomly: true,
 	})
 }

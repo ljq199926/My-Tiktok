@@ -20,7 +20,7 @@ import (
 func QueryUserIdByToken(c context.Context, token string) (int64, error) {
 	log.Info("QueryUserIdByToken", redisDB, token)
 	tokens := redisDB.HMGet(c, token, "UserId").Val()
-	if len(tokens) == 0 {
+	if len(tokens) == 0 || tokens == nil {
 		return -1, errors.New("query redis failed")
 	}
 	parseInt, err := strconv.ParseInt(tokens[0].(string), 10, 64)

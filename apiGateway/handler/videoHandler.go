@@ -25,8 +25,9 @@ import (
 func UploadVideo(c *gin.Context) {
 	log.Info("UploadVideo method")
 	token := c.PostForm("token")
+	title := c.PostForm("title")
 	data, errr := c.FormFile("data")
-	log.Infof("data_size：%d", data.Size)
+	log.Infof("data_size：%d %s %s", data.Size, token, title)
 	if errr != nil {
 		log.Errorf("failed in read file %s", errr.Error())
 		c.JSON(200, pb.DouyinPublishActionResponse{StatusMsg: errr.Error(), StatusCode: 1})
@@ -57,6 +58,7 @@ func UploadVideo(c *gin.Context) {
 	rsp, err := videoService.PublishAction(context.Background(), &pb.DouyinPublishActionRequest{
 		Token: token,
 		Data:  Bdata,
+		Title: title,
 	})
 	if err != nil {
 		log.Error("upload failed")
@@ -103,8 +105,13 @@ func PublishList(c *gin.Context) {
 	//	log.Error(err)
 	//}
 	//c.JSON(200, &rsp)
-
-	if (*rsp).VideoList == nil {
+	if rsp == nil {
+		c.JSON(200, gin.H{
+			"status_code": 1,
+			"status_msg":  "error call",
+			"video_list":  []*pb.Video{},
+		})
+	} else if (*rsp).VideoList == nil {
 		c.JSON(200, gin.H{
 			"status_code": (*rsp).StatusCode,
 			"status_msg":  (*rsp).StatusMsg,

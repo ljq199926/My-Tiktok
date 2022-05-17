@@ -24,6 +24,7 @@ type Video struct {
 	FavoriteCount int64
 	CommentCount  int64
 	CreateDate    time.Time
+	Title         string
 }
 
 type User struct {
@@ -59,12 +60,19 @@ func InitVideo(data *Video) {
 	data.CommentCount = 0
 	data.FavoriteCount = 0
 	data.CreateDate = time.Now()
+	data.Title = ""
 }
 
 func QueryVideo(date *string, limit *int) []*Video {
 	var VideoList []*Video
-	db.Where("create_date <= ?", date).Order("id desc").Limit(*limit).Find(&VideoList)
-	return VideoList
+	log.Info(*date)
+	db.Where("create_date < ?", *date).Order("create_date desc").Find(&VideoList)
+	//db.Where("create_date <= ?", date).Order("id desc").Limit(*limit).Find(&VideoList)
+	log.Info(VideoList)
+	if len(VideoList) <= 30 {
+		return VideoList
+	}
+	return VideoList[0:*limit]
 }
 
 func QueryVideoByUserId(userId int64) []*Video {
@@ -76,12 +84,11 @@ func QueryVideoByUserId(userId int64) []*Video {
 func QueryUserById(Id int64) User {
 	var user User
 	db.Find(&user, Id)
-	log.Info(user)
 	return user
 }
 
 func IsFavorite(userId int64, VideoId int64) bool {
 	var Count int64
-	db.Model(&Favorite{}).Where("user_id = ? and video_id and status=?", userId, VideoId, "0").Count(&Count)
+	db.Model(&Favorite{}).Where("user_id = ? and video_id and status=?", userId, VideoId, "LIKE").Count(&Count)
 	return Count == 1
 }

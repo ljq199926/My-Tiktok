@@ -10,9 +10,9 @@ service VideoService {
 }
 
 message douyin_publish_action_request{
-  int64 user_id = 1;//用户id
-  string token = 2;//用户鉴权token
-  bytes data = 3;//视颇陵数据
+  string token = 1;//用户鉴权token
+  bytes data = 2;//视颇陵数据
+  string title = 3;
 }
 
 
@@ -53,6 +53,7 @@ message video{
   int64 favorite_count = 5;//视频的点赞总数
   int64 comment_count = 6;//视颇的评论总数
   bool is_favorite = 7;//true-已点攒，false-末点攒
+  string title = 8;
 }
 
 message User{

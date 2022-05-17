@@ -6,6 +6,7 @@ import (
 	VideoService "VideoService/proto/VideoService"
 	"github.com/micro/go-micro/v2"
 	log "github.com/micro/go-micro/v2/logger"
+	"github.com/micro/go-micro/v2/registry"
 	"github.com/micro/go-micro/v2/server/grpc"
 	"github.com/micro/go-plugins/registry/consul/v2"
 )
@@ -14,7 +15,9 @@ func main() {
 	model.InitDB()
 	model.InitRedis()
 	// New Service
-	reg := consul.NewRegistry()
+	reg := consul.NewRegistry(func(options *registry.Options) {
+		options.Addrs = []string{"127.0.0.1:8500"}
+	})
 
 	service := micro.NewService(
 		micro.Name("go.micro.service.VideoService"),

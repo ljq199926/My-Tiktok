@@ -16,7 +16,6 @@ func (video *VideoService) PublishAction(c context.Context, req *videoService.Do
 	log.Info("PublishAction called")
 	var v model.Video
 	model.InitVideo(&v)
-
 	var data []byte
 	log.Infof("stream_size：%d", len(req.Data))
 	token = req.Token
@@ -35,6 +34,7 @@ func (video *VideoService) PublishAction(c context.Context, req *videoService.Do
 	res := utils.UploadQiniu(data)
 	v.PlayUrl = "http://rbtdate4z.hn-bkt.clouddn.com/" + res
 	v.CoverUrl = "http://rbtdate4z.hn-bkt.clouddn.com/cover/" + res
+	v.Title = req.Title
 	model.InsertVideo(&v)
 
 	rsp.StatusCode = 0
@@ -52,45 +52,43 @@ func PaserModel(date string, video []*model.Video) (int64, []*videoService.Video
 	var LatestTime = time.Now().Unix()
 	var Videos []*videoService.Video
 	for _, v := range VideoList {
+		//log.Info(v.CreateDate.Unix(), LatestTime)
 		if v.CreateDate.Unix() < LatestTime {
 			LatestTime = v.CreateDate.Unix()
 		}
 		var tmpV videoService.Video
+		u := model.QueryUserById(v.AuthorId)
 		tmpV.Author = &videoService.User{
-			Id:            0,
-			Name:          "",
-			Fol1OwCount:   0,
-			FollowerCount: 0,
+			Id:            u.UserId,
+			Name:          u.Username,
+			Fol1OwCount:   u.FollowCount,
+			FollowerCount: u.FollowerCount,
 			IsFollow:      false,
 		}
 		tmpV.Id = v.Id
 		tmpV.CoverUrl = v.CoverUrl
 		tmpV.PlayUrl = v.PlayUrl
-		tmpV.IsFavorite = false
+		tmpV.IsFavorite = model.IsFavorite(u.UserId, v.Id)
 		tmpV.CommentCount = v.CommentCount
 		tmpV.FavoriteCount = v.FavoriteCount
-		u := model.QueryUserById(v.AuthorId)
-		tmpV.Author.Id = u.UserId
-		tmpV.Author.Name = u.Username
-		tmpV.Author.FollowerCount = u.FollowerCount
-		tmpV.Author.Fol1OwCount = u.FollowCount
-		tmpV.Author.IsFollow = model.IsFavorite(u.UserId, v.Id)
+		tmpV.Title = v.Title
 
 		Videos = append(Videos, &tmpV)
 	}
-	return LatestTime, Videos
+	return LatestTime * 1000, Videos
 }
 
 func (video *VideoService) Feed(c context.Context, req *videoService.DouyinFeedRequest, rep *videoService.DouyinFeedResponse) error {
 	LatestTime := req.LatestTime
 	format := "2006-01-02 15:04:05"
-	t := time.Unix(LatestTime, 0)
+	t := time.Unix(LatestTime/1000, 0)
 	date := t.Format(format)
 	log.Info(date)
 
 	rep.StatusCode = 0
 	rep.StatusMsg = "success"
 	rep.NextTime, rep.VideoList = PaserModel(date, nil)
+	log.Info(len(rep.VideoList), rep.VideoList)
 	return nil
 }
 
