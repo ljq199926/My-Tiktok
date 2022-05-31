@@ -69,6 +69,6 @@ func InitRedis() {
 		WriteTimeout: time.Minute,
 		// To route commands by latency or randomly, enable one of the following.
 		//RouteByLatency: true,
-		RouteRandomly: true,
+		//RouteRandomly: true,
 	})
 }

@@ -28,6 +28,9 @@ type Yaml struct {
 	}
 }
 
+const Like = 1
+const Cancel = 2
+
 var (
 	DbUser     string
 	DbPassword string

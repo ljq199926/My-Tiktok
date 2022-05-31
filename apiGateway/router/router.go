@@ -24,10 +24,13 @@ func NewRouter() *gin.Engine {
 		authRouter.POST("/publish/action/", handler.UploadVideo)
 		authRouter.POST("/favorite/action/", handler.FavorAction)
 		authRouter.GET("/favorite/list/", handler.FavorList)
+		authRouter.POST("/comment/action/", handler.CommentAction)
+		authRouter.GET("/comment/list/", handler.CommentList)
+		authRouter.GET("/publish/list/", handler.PublishList)
 	}
 	//userRouter.POST("/publish/action/", handler.UploadVideo)
 	userRouter.GET("/feed/", handler.Feed)
-	userRouter.GET("/publish/list/", handler.PublishList)
+	//userRouter.GET("/publish/list/", handler.PublishList)
 	//userRouter.POST("/favorite/action/", handler.FavorAction)
 	//userRouter.GET("/favorite/list/", handler.FavorList)
 

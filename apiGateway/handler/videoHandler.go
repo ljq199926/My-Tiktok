@@ -121,3 +121,55 @@ func PublishList(c *gin.Context) {
 		c.JSON(200, &rsp)
 	}
 }
+
+func CommentAction(c *gin.Context) {
+	//userId := c.Query("user_id")
+	token := c.Query("token")
+	videoId := c.Query("video_id")
+	actionType := c.Query("action_type")
+	commentText := c.Query("comment_text")
+	commentId := c.Query("comment_id")
+	//log.Info(userId, videoId, actionType, commentText, commentId, token)
+	log.Infof(" videoid: %v, actiontype: %v, commenttext: %v, commentid: %v, token:%v",
+		videoId, actionType, commentText, commentId, token)
+	//_userId, _ := strconv.ParseInt(userId, 10, 64)
+	_videoId, _ := strconv.ParseInt(videoId, 10, 64)
+	_commentId, _ := strconv.ParseInt(commentId, 10, 64)
+	_actionType, _ := strconv.Atoi(actionType)
+	log.Infof(" _videoId: %v, _actionType: %v, _commentId: %v",
+		_videoId, _actionType, _commentId)
+	microService := utils.InitService()
+	videoService := pb.NewVideoService("go.micro.service.VideoService", microService.Client())
+	rsp, err := videoService.CommentAction(context.Background(), &pb.DouyinCommentActionRequest{
+		Token: token,
+		//UserId:      _userId,
+		VideoId:     _videoId,
+		ActionType:  int32(_actionType),
+		CommentId:   _commentId,
+		CommentText: commentText,
+	})
+
+	if err != nil {
+		log.Error(err)
+	}
+
+	c.JSON(200, &rsp)
+}
+
+func CommentList(c *gin.Context) {
+	token := c.Query("token")
+	videoId := c.Query("video_id")
+	_videoId, _ := strconv.ParseInt(videoId, 10, 64)
+	microService := utils.InitService()
+	videoService := pb.NewVideoService("go.micro.service.VideoService", microService.Client())
+	rsp, err := videoService.CommentList(context.Background(), &pb.DouyinCommentListRequest{
+		Token:   token,
+		VideoId: _videoId,
+	})
+
+	if err != nil {
+		log.Error(err)
+	}
+
+	c.JSON(200, &rsp)
+}

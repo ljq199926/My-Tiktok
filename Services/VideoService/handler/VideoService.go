@@ -4,6 +4,7 @@ import (
 	"VideoService/model"
 	"VideoService/utils"
 	"context"
+	"fmt"
 	log "github.com/micro/go-micro/v2/logger"
 	"time"
 )
@@ -113,5 +114,251 @@ func (video *VideoService) PublishList(c context.Context, req *videoService.Douy
 	log.Info("rep.VideoList:", rep.VideoList)
 	rep.StatusCode = 0
 	rep.StatusMsg = "success"
+	return nil
+}
+
+func (f *VideoService) FavoriteAction(ctx context.Context, req *videoService.DouyinFavoriteActionRequest, rsp *videoService.DouyinFavoriteActionResponse) error {
+	token := req.Token
+	log.Info("FavoriteAction in videoserive")
+	if token == "" {
+		log.Error("token is empty")
+		rsp.StatusCode = 1
+		rsp.StatusMsg = "token error"
+		return nil
+	}
+
+	userId, err := model.QueryUserIdByToken(ctx, token)
+	if err != nil {
+		log.Errorf("redis query error:%s, %d", err.Error(), token)
+		rsp.StatusCode = 1
+		rsp.StatusMsg = err.Error()
+		return nil
+	}
+	fmt.Printf("FavroiteAction's userId:%d\n", userId)
+
+	videoId := req.VideoId
+	actionType := req.ActionType
+	queryFavor, row := model.QueryFavor(userId, videoId)
+
+	//点赞
+	if actionType == utils.Like {
+		//首次点赞插入记录，非首次点赞则修改status
+		if row == 0 {
+			var favor model.Favorite
+			favor.UserId = userId
+			favor.VideoId = videoId
+			favor.CreateDate = time.Now()
+			favor.Status = "LIKE"
+			result := model.InsertFavorite(&favor)
+			if result == false {
+				rsp.StatusCode = 1
+				rsp.StatusMsg = "LIKE Failed"
+				return nil
+			}
+			result = model.UpdateVideoByVideoId(videoId, actionType)
+			if result == false {
+				rsp.StatusCode = 1
+				rsp.StatusMsg = "LIKE Failed"
+				return nil
+			}
+		} else {
+			result := model.UpdateFavor(&queryFavor, "LIKE")
+			if result == false {
+				rsp.StatusCode = 1
+				rsp.StatusMsg = "LIKE Failed"
+				return nil
+			}
+			result = model.UpdateVideoByVideoId(videoId, actionType)
+			if result == false {
+				rsp.StatusCode = 1
+				rsp.StatusMsg = "LIKE Failed"
+				return nil
+			}
+		}
+	}
+
+	//取消点赞
+	if actionType == utils.Cancel {
+		result := model.UpdateFavor(&queryFavor, "Cancel")
+		if result == false {
+			rsp.StatusCode = 1
+			rsp.StatusMsg = "Cancel failed"
+			return nil
+		}
+		result = model.UpdateVideoByVideoId(videoId, actionType)
+		if result == false {
+			rsp.StatusCode = 1
+			rsp.StatusMsg = "Cancel Failed"
+			return nil
+		}
+	}
+
+	rsp.StatusCode = 0
+	if actionType == utils.Like {
+		rsp.StatusMsg = "Like Success"
+	} else {
+		rsp.StatusMsg = "Cancel Success"
+	}
+	return nil
+}
+
+func (f *VideoService) FavoriteList(ctx context.Context, req *videoService.DouyinFavoriteListRequest, rsp *videoService.DouyinFavoriteListResponse) error {
+	log.Info("FavoriteList started!")
+	token := req.Token
+	if token == "" {
+		log.Error("token is empty")
+		rsp.StatusCode = 1
+		rsp.StatusMsg = "token error"
+		return nil
+	}
+
+	userId, err := model.QueryUserIdByToken(ctx, token)
+	if err != nil {
+		log.Errorf("redis query error:%s, %s", err.Error(), token)
+		rsp.StatusCode = 1
+		rsp.StatusMsg = err.Error()
+		return nil
+	}
+
+	fmt.Printf("FavorList's userId:%d\n", userId)
+	favorList, row1 := model.QueryFavorByUserId(userId)
+	var Videos []*videoService.Video
+	if row1 > 0 {
+		for _, v := range favorList {
+			var tmpV videoService.Video
+			tmpV.Author = &videoService.User{
+				Id:            0,
+				Name:          "",
+				Fol1OwCount:   0,
+				FollowerCount: 0,
+				IsFollow:      false,
+			}
+			tmpV.Id = v.VideoId
+			u, _ := model.QueryVideoByVideoId(v.VideoId)
+			tmpV.Author.Id = u.AuthorId
+			author, row2 := model.QueryUserByUserId(u.AuthorId)
+			if row2 > 0 {
+				tmpV.Author.Name = author.Username
+				tmpV.Author.Fol1OwCount = author.FollowCount
+				tmpV.Author.FollowerCount = author.FollowerCount
+				//此用户是否关注该作者待后面关注列表完善后再修改
+				tmpV.Author.IsFollow = false
+			}
+			tmpV.PlayUrl = u.PlayUrl
+			tmpV.CoverUrl = u.CoverUrl
+			tmpV.FavoriteCount = u.FavoriteCount
+			tmpV.CommentCount = u.CommentCount
+			tmpV.IsFavorite = true
+
+			Videos = append(Videos, &tmpV)
+		}
+	}
+
+	rsp.VideoList = Videos
+	log.Info("rsp.VideoList:", rsp.VideoList)
+	rsp.StatusCode = 0
+	rsp.StatusMsg = "Get FavoriteList Success"
+
+	return nil
+}
+
+func (video *VideoService) CommentAction(c context.Context, req *videoService.DouyinCommentActionRequest, rep *videoService.DouyinCommentActionResponse) error {
+	userId, err := model.QueryUserIdByToken(c, req.Token)
+	if err != nil {
+		rep.StatusCode = -1
+		rep.StatusMsg = "token error"
+		return nil
+	}
+	videoId := req.VideoId
+	actionType := req.ActionType
+
+	log.Infof("userid: %v, videoId: %v, actionType: %v", userId, videoId, actionType)
+	if actionType == 1 { //发布评论
+		commentText := req.CommentText
+		user := model.QueryUserById(userId)
+		log.Info(user, userId)
+		if user.UserId == -1 {
+			rep.StatusCode = -1
+			rep.StatusMsg = "userid error"
+			return nil
+		}
+		if cnt := model.CountVideoByVideoId(videoId); cnt == 0 {
+			rep.StatusCode = -1
+			rep.StatusMsg = "video_id error"
+			return nil
+		}
+		if check := model.InsertComment(userId, videoId, commentText); !check {
+			rep.StatusCode = -1
+			rep.StatusMsg = "insert error"
+			return nil
+		}
+		var comment videoService.Comment
+		comment.User = &videoService.User{
+			Id:            user.UserId,
+			Name:          user.Username,
+			Fol1OwCount:   user.FollowCount,
+			FollowerCount: user.FollowerCount,
+			IsFollow:      false,
+		}
+		comment.Content = commentText
+		comment.CreateDate = time.Now().Format("01-02")
+		rep.StatusCode = 0
+		rep.Comment = &comment
+		rep.StatusMsg = "add success"
+	} else if actionType == 2 {
+		commentId := req.CommentId
+
+		if check := model.DeleteCommentByCommentId(commentId); !check {
+			rep.StatusCode = -1
+			rep.StatusMsg = "delete error"
+			return nil
+		}
+		rep.StatusCode = 0
+		rep.StatusMsg = "delete success"
+	} else {
+		rep.StatusCode = -1
+		rep.StatusMsg = "actionType error"
+	}
+	return nil
+}
+
+func (video *VideoService) CommentList(c context.Context, req *videoService.DouyinCommentListRequest, rep *videoService.DouyinCommentListResponse) error {
+	videoId := req.VideoId
+
+	//token := req.Token
+	//userId, err := model.QueryUserIdByToken(c, token)
+	//if err != nil {
+	//	rep.StatusCode = -1
+	//	rep.StatusMsg = "token err"
+	//	return nil
+	//}
+
+	commentList := model.QueryCommentListByVideoId(videoId)
+	var tmpCommentList []*videoService.Comment
+
+	for _, comment := range commentList {
+		user := model.QueryUserById(comment.UserId)
+		if user.UserId == -1 {
+			rep.StatusCode = -1
+			rep.StatusMsg = "userid err"
+			return nil
+		}
+		tmpComment := &videoService.Comment{
+			Id: comment.Id,
+			User: &videoService.User{
+				Id:            user.UserId,
+				Name:          user.Username,
+				Fol1OwCount:   user.FollowCount,
+				FollowerCount: user.FollowerCount,
+				IsFollow:      false,
+			},
+			Content:    comment.Content,
+			CreateDate: comment.CreateDate.Format("01-02"),
+		}
+		tmpCommentList = append(tmpCommentList, tmpComment)
+	}
+	rep.StatusCode = 0
+	rep.StatusMsg = "success"
+	rep.CommentList = tmpCommentList
 	return nil
 }

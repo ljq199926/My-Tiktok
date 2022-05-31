@@ -1,10 +1,11 @@
 package handler
 
 import (
-	pb "apiGateway/proto/FavoriteService"
+	pb "apiGateway/proto/VideoService"
 	"apiGateway/utils"
 	"context"
 	"github.com/gin-gonic/gin"
+	log "github.com/micro/go-micro/v2/logger"
 	"strconv"
 )
 
@@ -20,15 +21,16 @@ func FavorAction(ctx *gin.Context) {
 	_actiontype, _ := strconv.Atoi(actionType)
 	actiontype := int32(_actiontype)
 
+	log.Info("FavorAction start: ", token)
+
 	microService := utils.InitService()
-	favoriteService := pb.NewFavoriteService("go.micro.service.FavoriteService", microService.Client())
+	favoriteService := pb.NewVideoService("go.micro.service.VideoService", microService.Client())
 	rsp, err := favoriteService.FavoriteAction(context.Background(), &pb.DouyinFavoriteActionRequest{
 		UserId:     userid,
 		Token:      token,
 		VideoId:    videoid,
 		ActionType: actiontype,
 	})
-
 	if err != nil {
 		ctx.JSON(500, err)
 		return
@@ -41,7 +43,7 @@ func FavorList(ctx *gin.Context) {
 	token := ctx.Query("token")
 
 	microService := utils.InitService()
-	favoriteService := pb.NewFavoriteService("go.micro.service.FavoriteService", microService.Client())
+	favoriteService := pb.NewVideoService("go.micro.service.VideoService", microService.Client())
 	rsp, err := favoriteService.FavoriteList(context.Background(), &pb.DouyinFavoriteListRequest{
 		Token: token,
 	})

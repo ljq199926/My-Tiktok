@@ -37,6 +37,10 @@ type VideoService interface {
 	PublishAction(ctx context.Context, in *DouyinPublishActionRequest, opts ...client.CallOption) (*DouyinPublishActionResponse, error)
 	Feed(ctx context.Context, in *DouyinFeedRequest, opts ...client.CallOption) (*DouyinFeedResponse, error)
 	PublishList(ctx context.Context, in *DouyinPublishListRequest, opts ...client.CallOption) (*DouyinPublishListResponse, error)
+	FavoriteAction(ctx context.Context, in *DouyinFavoriteActionRequest, opts ...client.CallOption) (*DouyinFavoriteActionResponse, error)
+	FavoriteList(ctx context.Context, in *DouyinFavoriteListRequest, opts ...client.CallOption) (*DouyinFavoriteListResponse, error)
+	CommentAction(ctx context.Context, in *DouyinCommentActionRequest, opts ...client.CallOption) (*DouyinCommentActionResponse, error)
+	CommentList(ctx context.Context, in *DouyinCommentListRequest, opts ...client.CallOption) (*DouyinCommentListResponse, error)
 }
 
 type videoService struct {
@@ -87,12 +91,56 @@ func (c *videoService) PublishList(ctx context.Context, in *DouyinPublishListReq
 	return out, nil
 }
 
+func (c *videoService) FavoriteAction(ctx context.Context, in *DouyinFavoriteActionRequest, opts ...client.CallOption) (*DouyinFavoriteActionResponse, error) {
+	req := c.c.NewRequest(c.name, "VideoService.FavoriteAction", in)
+	out := new(DouyinFavoriteActionResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *videoService) FavoriteList(ctx context.Context, in *DouyinFavoriteListRequest, opts ...client.CallOption) (*DouyinFavoriteListResponse, error) {
+	req := c.c.NewRequest(c.name, "VideoService.FavoriteList", in)
+	out := new(DouyinFavoriteListResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *videoService) CommentAction(ctx context.Context, in *DouyinCommentActionRequest, opts ...client.CallOption) (*DouyinCommentActionResponse, error) {
+	req := c.c.NewRequest(c.name, "VideoService.CommentAction", in)
+	out := new(DouyinCommentActionResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *videoService) CommentList(ctx context.Context, in *DouyinCommentListRequest, opts ...client.CallOption) (*DouyinCommentListResponse, error) {
+	req := c.c.NewRequest(c.name, "VideoService.CommentList", in)
+	out := new(DouyinCommentListResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for VideoService service
 
 type VideoServiceHandler interface {
 	PublishAction(context.Context, *DouyinPublishActionRequest, *DouyinPublishActionResponse) error
 	Feed(context.Context, *DouyinFeedRequest, *DouyinFeedResponse) error
 	PublishList(context.Context, *DouyinPublishListRequest, *DouyinPublishListResponse) error
+	FavoriteAction(context.Context, *DouyinFavoriteActionRequest, *DouyinFavoriteActionResponse) error
+	FavoriteList(context.Context, *DouyinFavoriteListRequest, *DouyinFavoriteListResponse) error
+	CommentAction(context.Context, *DouyinCommentActionRequest, *DouyinCommentActionResponse) error
+	CommentList(context.Context, *DouyinCommentListRequest, *DouyinCommentListResponse) error
 }
 
 func RegisterVideoServiceHandler(s server.Server, hdlr VideoServiceHandler, opts ...server.HandlerOption) error {
@@ -100,6 +148,10 @@ func RegisterVideoServiceHandler(s server.Server, hdlr VideoServiceHandler, opts
 		PublishAction(ctx context.Context, in *DouyinPublishActionRequest, out *DouyinPublishActionResponse) error
 		Feed(ctx context.Context, in *DouyinFeedRequest, out *DouyinFeedResponse) error
 		PublishList(ctx context.Context, in *DouyinPublishListRequest, out *DouyinPublishListResponse) error
+		FavoriteAction(ctx context.Context, in *DouyinFavoriteActionRequest, out *DouyinFavoriteActionResponse) error
+		FavoriteList(ctx context.Context, in *DouyinFavoriteListRequest, out *DouyinFavoriteListResponse) error
+		CommentAction(ctx context.Context, in *DouyinCommentActionRequest, out *DouyinCommentActionResponse) error
+		CommentList(ctx context.Context, in *DouyinCommentListRequest, out *DouyinCommentListResponse) error
 	}
 	type VideoService struct {
 		videoService
@@ -122,4 +174,20 @@ func (h *videoServiceHandler) Feed(ctx context.Context, in *DouyinFeedRequest, o
 
 func (h *videoServiceHandler) PublishList(ctx context.Context, in *DouyinPublishListRequest, out *DouyinPublishListResponse) error {
 	return h.VideoServiceHandler.PublishList(ctx, in, out)
+}
+
+func (h *videoServiceHandler) FavoriteAction(ctx context.Context, in *DouyinFavoriteActionRequest, out *DouyinFavoriteActionResponse) error {
+	return h.VideoServiceHandler.FavoriteAction(ctx, in, out)
+}
+
+func (h *videoServiceHandler) FavoriteList(ctx context.Context, in *DouyinFavoriteListRequest, out *DouyinFavoriteListResponse) error {
+	return h.VideoServiceHandler.FavoriteList(ctx, in, out)
+}
+
+func (h *videoServiceHandler) CommentAction(ctx context.Context, in *DouyinCommentActionRequest, out *DouyinCommentActionResponse) error {
+	return h.VideoServiceHandler.CommentAction(ctx, in, out)
+}
+
+func (h *videoServiceHandler) CommentList(ctx context.Context, in *DouyinCommentListRequest, out *DouyinCommentListResponse) error {
+	return h.VideoServiceHandler.CommentList(ctx, in, out)
 }
