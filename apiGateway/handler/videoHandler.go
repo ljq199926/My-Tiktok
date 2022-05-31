@@ -70,7 +70,7 @@ func Feed(c *gin.Context) {
 	timeStamp := c.Query("latest_time")
 	var latestTime int64
 	if timeStamp == "" {
-		latestTime = time.Now().Unix()
+		latestTime = time.Now().Unix() * 1000
 	} else {
 		latestTime, _ = strconv.ParseInt(c.Query("latest_time"), 10, 64)
 	}

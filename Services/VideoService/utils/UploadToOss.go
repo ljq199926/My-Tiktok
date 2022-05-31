@@ -48,7 +48,7 @@ func UploadQiniu(data []byte) string {
 	dataLen := int64(len(data))
 
 	log.Infof("start upload：%s", path)
-	go formUploader.Put(context.Background(), &ret, upToken, path, bytes.NewReader(data), dataLen, nil)
+	formUploader.Put(context.Background(), &ret, upToken, path, bytes.NewReader(data), dataLen, nil)
 	log.Info("ret", ret)
 	return path
 }
