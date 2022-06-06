@@ -6,6 +6,7 @@ import (
 	"UserService/utils"
 	"context"
 	"fmt"
+	log "github.com/micro/go-micro/v2/logger"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -138,5 +139,66 @@ func (e *UserService) Info(ctx context.Context, req *userService.DouyinUserReque
 	rsp.StatusCode = 0
 	rsp.StatusMsg = "Get user's information successfully"
 
+	return nil
+}
+
+func (e *UserService) Action(ctx context.Context, req *userService.DouyinRelationActionRequest, rsp *userService.DouyinRelationActionResponse) error {
+	req.UserId, _ = model.QueryUserIdByToken(ctx, req.Token)
+	log.Info(req.Token)
+	log.Info(req.UserId)
+	if req.ActionType == 1 {
+		model.AddFollower(req.UserId, req.ToUserId)
+		rsp.StatusCode = 0
+		rsp.StatusMsg = "Follow user successfully"
+	} else {
+		model.DeleteFollower(req.UserId, req.ToUserId)
+		rsp.StatusCode = 0
+		rsp.StatusMsg = "Cancell following users successfully"
+	}
+	return nil
+}
+func (e *UserService) FollowList(ctx context.Context, req *userService.DouyinRelationFollowListRequest, rsp *userService.DouyinRelationFollowListResponse) error {
+	//req.UserId, _ = model.QueryUserIdByToken(ctx, req.Token)
+	var anser []*userService.User
+	log.Info("enter followlist")
+	userList := model.FollowList(req.UserId)
+	for _, user := range userList {
+		user1 := &userService.User{
+			Id:            user.UserId,
+			Name:          user.Username,
+			FollowCount:   user.FollowCount,
+			FollowerCount: user.FollowerCount,
+			IsFollow:      true,
+		}
+		anser = append(anser, user1)
+	}
+	rsp.StatusCode = 0
+	rsp.StatusMsg = "Get followList successfully"
+	rsp.UserList = anser
+	return nil
+}
+func (e *UserService) FollowerList(ctx context.Context, req *userService.DouyinRelationFollowerListRequest, rsp *userService.DouyinRelationFollowerListResponse) error {
+	var anser []*userService.User
+	log.Info("enter followerlist")
+	userList := model.FollowerList(req.UserId)
+	myUserId, _ := model.QueryUserIdByToken(ctx, req.Token)
+	followList := model.FollowList(myUserId)
+	data := make(map[int64]bool)
+	for _, follow := range followList {
+		data[follow.UserId] = true
+	}
+	for _, user := range userList {
+		user1 := &userService.User{
+			Id:            user.UserId,
+			Name:          user.Username,
+			FollowCount:   user.FollowCount,
+			FollowerCount: user.FollowerCount,
+			IsFollow:      data[user.UserId],
+		}
+		anser = append(anser, user1)
+	}
+	rsp.StatusCode = 0
+	rsp.StatusMsg = "Get followerList successfully"
+	rsp.UserList = anser
 	return nil
 }

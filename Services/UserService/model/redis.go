@@ -2,7 +2,9 @@ package model
 
 import (
 	"context"
+	"errors"
 	log "github.com/micro/go-micro/v2/logger"
+	"strconv"
 )
 
 /*
@@ -28,4 +30,18 @@ func AddToken(token string, user *User) error {
 	err := redisDb.HMSet(context.Background(), token, data).Err()
 	log.Info(err)
 	return err
+}
+func QueryUserIdByToken(c context.Context, token string) (int64, error) {
+	log.Info("QueryUserIdByToken", redisDb, token)
+	tokens := redisDb.HMGet(c, token, "UserId").Val()
+	if len(tokens) == 0 || tokens == nil {
+		return -1, errors.New("query redis failed")
+	}
+	parseInt, err := strconv.ParseInt(tokens[0].(string), 10, 64)
+	if err != nil {
+		log.Info(err)
+		return -1, err
+	}
+	log.Info("QueryUserIdByToken-END: ", parseInt)
+	return parseInt, nil
 }

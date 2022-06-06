@@ -9,7 +9,7 @@ import (
 func NewRouter() *gin.Engine {
 	route := gin.Default()
 	route.Use(middleware.Cors())
-	route.GET("/demo/:name", handler.Hello)
+	//route.GET("/demo/:name", handler.Hello)
 
 	userRouter := route.Group("/douyin")
 	//这里使用中间件
@@ -27,6 +27,9 @@ func NewRouter() *gin.Engine {
 		authRouter.POST("/comment/action/", handler.CommentAction)
 		authRouter.GET("/comment/list/", handler.CommentList)
 		authRouter.GET("/publish/list/", handler.PublishList)
+		authRouter.POST("/relation/action/", handler.RelationAction)
+		authRouter.GET("/relation/follow/list/", handler.FollowList)
+		authRouter.GET("/relation/follower/list/", handler.FollowerList)
 	}
 	//userRouter.POST("/publish/action/", handler.UploadVideo)
 	userRouter.GET("/feed/", handler.Feed)

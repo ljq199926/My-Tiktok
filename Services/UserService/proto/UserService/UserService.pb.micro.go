@@ -37,6 +37,9 @@ type UserService interface {
 	Login(ctx context.Context, in *DouyinUserLoginRequest, opts ...client.CallOption) (*DouyinUserLoginResponse, error)
 	Register(ctx context.Context, in *DouyinUserRegisterRequest, opts ...client.CallOption) (*DouyinUserRegisterResponse, error)
 	Info(ctx context.Context, in *DouyinUserRequest, opts ...client.CallOption) (*DouyinUserResponse, error)
+	Action(ctx context.Context, in *DouyinRelationActionRequest, opts ...client.CallOption) (*DouyinRelationActionResponse, error)
+	FollowList(ctx context.Context, in *DouyinRelationFollowListRequest, opts ...client.CallOption) (*DouyinRelationFollowListResponse, error)
+	FollowerList(ctx context.Context, in *DouyinRelationFollowerListRequest, opts ...client.CallOption) (*DouyinRelationFollowerListResponse, error)
 }
 
 type userService struct {
@@ -87,12 +90,45 @@ func (c *userService) Info(ctx context.Context, in *DouyinUserRequest, opts ...c
 	return out, nil
 }
 
+func (c *userService) Action(ctx context.Context, in *DouyinRelationActionRequest, opts ...client.CallOption) (*DouyinRelationActionResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.Action", in)
+	out := new(DouyinRelationActionResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) FollowList(ctx context.Context, in *DouyinRelationFollowListRequest, opts ...client.CallOption) (*DouyinRelationFollowListResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.FollowList", in)
+	out := new(DouyinRelationFollowListResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) FollowerList(ctx context.Context, in *DouyinRelationFollowerListRequest, opts ...client.CallOption) (*DouyinRelationFollowerListResponse, error) {
+	req := c.c.NewRequest(c.name, "UserService.FollowerList", in)
+	out := new(DouyinRelationFollowerListResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for UserService service
 
 type UserServiceHandler interface {
 	Login(context.Context, *DouyinUserLoginRequest, *DouyinUserLoginResponse) error
 	Register(context.Context, *DouyinUserRegisterRequest, *DouyinUserRegisterResponse) error
 	Info(context.Context, *DouyinUserRequest, *DouyinUserResponse) error
+	Action(context.Context, *DouyinRelationActionRequest, *DouyinRelationActionResponse) error
+	FollowList(context.Context, *DouyinRelationFollowListRequest, *DouyinRelationFollowListResponse) error
+	FollowerList(context.Context, *DouyinRelationFollowerListRequest, *DouyinRelationFollowerListResponse) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
@@ -100,6 +136,9 @@ func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts .
 		Login(ctx context.Context, in *DouyinUserLoginRequest, out *DouyinUserLoginResponse) error
 		Register(ctx context.Context, in *DouyinUserRegisterRequest, out *DouyinUserRegisterResponse) error
 		Info(ctx context.Context, in *DouyinUserRequest, out *DouyinUserResponse) error
+		Action(ctx context.Context, in *DouyinRelationActionRequest, out *DouyinRelationActionResponse) error
+		FollowList(ctx context.Context, in *DouyinRelationFollowListRequest, out *DouyinRelationFollowListResponse) error
+		FollowerList(ctx context.Context, in *DouyinRelationFollowerListRequest, out *DouyinRelationFollowerListResponse) error
 	}
 	type UserService struct {
 		userService
@@ -122,4 +161,16 @@ func (h *userServiceHandler) Register(ctx context.Context, in *DouyinUserRegiste
 
 func (h *userServiceHandler) Info(ctx context.Context, in *DouyinUserRequest, out *DouyinUserResponse) error {
 	return h.UserServiceHandler.Info(ctx, in, out)
+}
+
+func (h *userServiceHandler) Action(ctx context.Context, in *DouyinRelationActionRequest, out *DouyinRelationActionResponse) error {
+	return h.UserServiceHandler.Action(ctx, in, out)
+}
+
+func (h *userServiceHandler) FollowList(ctx context.Context, in *DouyinRelationFollowListRequest, out *DouyinRelationFollowListResponse) error {
+	return h.UserServiceHandler.FollowList(ctx, in, out)
+}
+
+func (h *userServiceHandler) FollowerList(ctx context.Context, in *DouyinRelationFollowerListRequest, out *DouyinRelationFollowerListResponse) error {
+	return h.UserServiceHandler.FollowerList(ctx, in, out)
 }
