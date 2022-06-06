@@ -199,3 +199,10 @@ func QueryCommentListByVideoId(videoId int64) []Comment {
 	}
 	return commentList
 }
+
+func UpdateCommentCount(videoId int64, cnt int) {
+	err := db.Model(&Video{}).Where("id=?", videoId).Update("comment_count", gorm.Expr("comment_count+?", cnt)).Error
+	if err != nil {
+		log.Error(err)
+	}
+}

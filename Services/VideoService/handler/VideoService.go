@@ -292,6 +292,7 @@ func (video *VideoService) CommentAction(c context.Context, req *videoService.Do
 			rep.StatusMsg = "insert error"
 			return nil
 		}
+		model.UpdateCommentCount(videoId, 1)
 		var comment videoService.Comment
 		comment.User = &videoService.User{
 			Id:            user.UserId,
@@ -313,6 +314,7 @@ func (video *VideoService) CommentAction(c context.Context, req *videoService.Do
 			rep.StatusMsg = "delete error"
 			return nil
 		}
+		model.UpdateCommentCount(videoId, -1)
 		rep.StatusCode = 0
 		rep.StatusMsg = "delete success"
 	} else {
