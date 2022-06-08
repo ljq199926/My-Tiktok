@@ -8,9 +8,10 @@ mysql:
 
 redis:
   addr:
-    - 114.132.251.201:7000
+    - 121.199.72.67:10002
     - 114.132.251.201:7001
     - 114.132.251.201:7002
+  password : AmJ0reDBvb1$
 
 oss:
   ak: AVfymoHxgIsrJSud9MO89K0t1EBFved1IeyLbT4h

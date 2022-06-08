@@ -129,7 +129,7 @@ func (f *VideoService) FavoriteAction(ctx context.Context, req *videoService.Dou
 
 	userId, err := model.QueryUserIdByToken(ctx, token)
 	if err != nil {
-		log.Errorf("redis query error:%s, %d", err.Error(), token)
+		log.Errorf("redis query error:%v, %v", err, token)
 		rsp.StatusCode = 1
 		rsp.StatusMsg = err.Error()
 		return nil

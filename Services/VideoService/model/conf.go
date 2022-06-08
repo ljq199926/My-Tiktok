@@ -4,6 +4,7 @@ import (
 	"VideoService/utils"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	log "github.com/micro/go-micro/v2/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -13,7 +14,7 @@ import (
 )
 
 var db *gorm.DB
-var redisDB *redis.ClusterClient
+var redisDB *redis.Client
 var err error
 
 func InitDB() {
@@ -62,13 +63,10 @@ func InitDB() {
 //}
 
 func InitRedis() {
-	redisDB = redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs: utils.RedisAddr,
-		//MinIdleConns: 10,
-		ReadTimeout:  time.Minute,
-		WriteTimeout: time.Minute,
-		// To route commands by latency or randomly, enable one of the following.
-		//RouteByLatency: true,
-		//RouteRandomly: true,
+	log.Info(utils.RedisAddr[0], utils.Pwd)
+	redisDB = redis.NewClient(&redis.Options{
+		Addr:     utils.RedisAddr[0],
+		Password: utils.Pwd, // no password set
+		DB:       0,         // use default DB
 	})
 }

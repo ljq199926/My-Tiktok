@@ -16,6 +16,7 @@ type Yaml struct {
 	}
 	Redis struct {
 		Addr []string `yaml:"addr"`
+		Pwd  string   `yaml:"password"`
 	}
 	Oss struct {
 		AK     string `yaml:"ak"`
@@ -39,6 +40,7 @@ var (
 	DbName     string
 
 	RedisAddr []string
+	Pwd       string
 	AK        string
 	SK        string
 	Bucket    string
@@ -71,6 +73,7 @@ func LoadDB(conf *Yaml) {
 }
 func LoadRedis(conf *Yaml) {
 	RedisAddr = conf.Redis.Addr
+	Pwd = conf.Redis.Pwd
 }
 
 func LoadOss(conf *Yaml) {

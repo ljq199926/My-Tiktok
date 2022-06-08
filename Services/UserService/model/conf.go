@@ -4,7 +4,6 @@ import (
 	"UserService/utils"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	log "github.com/micro/go-micro/v2/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -14,7 +13,7 @@ import (
 )
 
 var db *gorm.DB
-var redisDb *redis.ClusterClient
+var redisDb *redis.Client
 var err error
 
 func InitDB() {
@@ -63,15 +62,9 @@ func InitDB() {
 //}
 
 func InitRedis() {
-	log.Info("init redis: ", utils.RedisAddr)
-	redisDb = redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs: utils.RedisAddr,
-		//MinIdleConns: 10,
-		ReadTimeout:  time.Minute,
-		WriteTimeout: time.Minute,
-
-		// To route commands by latency or randomly, enable one of the following.
-		//RouteByLatency: true,
-		RouteRandomly: true,
+	redisDb = redis.NewClient(&redis.Options{
+		Addr:     utils.RedisAddr[0],
+		Password: utils.Pwd, // no password set
+		DB:       0,         // use default DB
 	})
 }

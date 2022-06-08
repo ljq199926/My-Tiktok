@@ -16,6 +16,7 @@ type Yaml struct {
 	}
 	Redis struct {
 		Addr []string `yaml:"addr"`
+		Pwd  string   `yaml:"password"`
 	}
 	JwtKey string
 }
@@ -28,6 +29,7 @@ var (
 	DbName     string
 
 	RedisAddr []string
+	Pwd       string
 
 	JwtKey string
 )
@@ -56,6 +58,7 @@ func LoadDB(conf *Yaml) {
 }
 func LoadRedis(conf *Yaml) {
 	RedisAddr = conf.Redis.Addr
+	Pwd = conf.Redis.Pwd
 }
 func LoadJwt(conf *Yaml) {
 	JwtKey = conf.JwtKey
